@@ -28,7 +28,7 @@ class GNTP
 {
 public:
 	const static int DEFAULT_PORT = 23053;
-	GNTP(char *appName, EthernetClient client, IPAddress server);
+	GNTP(char *appName, IPAddress server);
 	void add(GNTPNotification notification);
 	void registerNotifications(void);
 	void checkConnection(void);

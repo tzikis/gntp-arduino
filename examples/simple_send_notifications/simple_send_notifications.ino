@@ -9,10 +9,8 @@ IPAddress server(192,168,1,124); // Your computer's IP
 IPAddress ip(192,168,1, 177);  //Your Arduino's IP
 
 // Initialize the Ethernet client library
-// with the IP address and port of the server 
-// that you want to connect to (port 80 is default for HTTP):
-EthernetClient client;
-GNTP gntp("Arduino Door Controller",client, server);
+// with the IP address of your comphter
+GNTP gntp("Arduino Door Controller", server);
 GNTPNotification notif_open("door opened", "Attention!", "The door is now open");
 GNTPNotification notif_close("door closed", "Attention!", "The door is now closed");
 void setup() 

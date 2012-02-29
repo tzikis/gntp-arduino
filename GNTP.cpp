@@ -8,9 +8,9 @@ GNTPNotification::GNTPNotification(char *name, char *title, char *description)
 	this->name = name;
 }
 
-GNTP::GNTP(char *appName, EthernetClient client, IPAddress server)
+GNTP::GNTP(char *appName, IPAddress server)
 {
-	this->client=client;
+	this->client= EthernetClient();
 	this->server=server;
 	this->appName = appName;
 	this->myNotifications = (notificationsList*) malloc(sizeof(notificationsList));
