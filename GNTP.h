@@ -35,6 +35,7 @@ public:
 	void sendNotification(char* name);
 	void sendNotification(GNTPNotification notification);
 	int count(void);
+	void begin(void);
 	EthernetClient client;
 	IPAddress server;
 	char* appName;

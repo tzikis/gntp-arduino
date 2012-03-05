@@ -1,5 +1,5 @@
 #include "GNTP.h"
-
+#include "MD5.c"
 
 GNTPNotification::GNTPNotification(char *name, char *title, char *description)
 {
@@ -16,9 +16,14 @@ GNTP::GNTP(char *appName, IPAddress server)
 	this->myNotifications = (notificationsList*) malloc(sizeof(notificationsList));
 	this->myNotifications->nextNotification = NULL;
 	this->port = DEFAULT_PORT;
-	// init("unknown");
 }
 
+void GNTP::begin(void)
+{
+	char pass[] = "hello";
+
+	Serial.println();
+}
 void GNTP::checkConnection()
 {
   // if there are incoming bytes available 
