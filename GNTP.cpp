@@ -1,5 +1,5 @@
 #include "GNTP.h"
-#include "MD5.h"
+#include "../MD5/MD5.h"
 
 GNTPNotification::GNTPNotification(char *name, char *title, char *description)
 {
