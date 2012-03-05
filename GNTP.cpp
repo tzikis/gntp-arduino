@@ -1,5 +1,5 @@
 #include "GNTP.h"
-#include "MD5.c"
+#include "MD5.h"
 
 GNTPNotification::GNTPNotification(char *name, char *title, char *description)
 {
@@ -16,31 +16,45 @@ GNTP::GNTP(char *appName, IPAddress server)
 	this->myNotifications = (notificationsList*) malloc(sizeof(notificationsList));
 	this->myNotifications->nextNotification = NULL;
 	this->port = DEFAULT_PORT;
+	this->debugging_enabled = false;
 }
 
 void GNTP::begin(void)
 {
-	char pass[] = "hello";
+	begin("hello world");
+}
+void GNTP::begin(char *pass)
+{
+	salt = generate_salt();
+	char* salted_string = season_string(pass, salt);
+	digest =MD5::make_hash(salted_string);
 
-	Serial.println();
+	char *md5str = MD5::make_digest(digest, 16);
+	digest = MD5::make_hash((char*) digest);
+	digest = (unsigned char*) MD5::make_digest(digest, 16);
+	salt = (unsigned char*) MD5::make_digest(salt, 8);
+	// Serial.println((char*) digest);
+	// Serial.println((char*) salt);
 }
 void GNTP::checkConnection()
 {
   // if there are incoming bytes available 
   // from the server, read them and print them:
-  while (client.available())
-  {
-    char c = client.read();
-    Serial.print(c);
-  }
+	// Serial.println("Checking connection");
+	delay(200);
+	while (client.available())
+	{
+		char c = client.read();
+		DBG(Serial.print(c););
+	}
 
-  // if the server's disconnected, stop the client:
-  if (!client.connected()) 
-  {
-    Serial.println();
-    Serial.println("disconnecting.");
-    client.stop();
-  }
+	// if the server's disconnected, stop the client:
+	if (!client.connected()) 
+	{
+		DBG(Serial.println(););
+		DBG(Serial.println("disconnecting."););
+		client.stop();
+	}
 }
 
 void GNTP::sendNotification(char* name)
@@ -61,7 +75,10 @@ void GNTP::sendNotification(GNTPNotification notification)
 {
   if(client.connect(server, this->port))
   {
-    client.println("GNTP/1.0 NOTIFY NONE MD5 7E99EC79CEF859867F40FE88E22075F3.E9B99BC5E617AD81");
+    client.print("GNTP/1.0 NOTIFY NONE MD5 ");
+	client.print((char*) digest);
+	client.print(".");
+	client.println((char*) salt);
     client.print("Application-Name: ");
 	client.println(appName);
     client.print("Notification-Name: ");
@@ -72,25 +89,28 @@ void GNTP::sendNotification(GNTPNotification notification)
 	client.println(notification.title);
     client.println();
     client.println();
-    delay(50);
     checkConnection();
   }
 }
 
 void GNTP::registerNotifications()
 {
-	Serial.println("connecting...");
+	DBG(Serial.println("connecting..."););
 	// Make a HTTP request:
 	if(client.connect(server, this->port))
 	{
-		Serial.println("connected");
-		client.println("GNTP/1.0 REGISTER NONE MD5 7E99EC79CEF859867F40FE88E22075F3.E9B99BC5E617AD81");
+		DBG(Serial.println("connected"););
+		client.print("GNTP/1.0 REGISTER NONE MD5 ");
+		client.print((char*) digest);
+		client.print(".");
+		client.println((char*) salt);
 		client.print("Application-Name: "); 
 		client.println(appName);
 		int bla = count();
 		client.print("Notifications-Count: ");
 		client.println(bla);
 		
+		// Serial.println("registration head sent");
 		notificationsList* lastItem = myNotifications;
 		while(lastItem->nextNotification != NULL)
 		{
@@ -102,13 +122,13 @@ void GNTP::registerNotifications()
 		}
 		client.println();
 		client.println();		
-		delay(50);
+		// Serial.println("registration sent");
 		checkConnection();
 	}
 	else
 	{
 		// kf you didn't get a connection to the server:
-		Serial.println("connection failed");
+		DBG(Serial.println("connection failed"););
 	}
 }
 
@@ -135,4 +155,36 @@ int GNTP::count(void)
 		lastItem = lastItem->nextNotification;
 	}
 	return count;
+}
+
+unsigned char* GNTP::generate_salt(void)
+{
+  randomSeed(analogRead(A0));
+  unsigned char* salt = (unsigned char*) malloc(sizeof(unsigned char) * 9);
+  for(int i = 0; i < 8; i++)
+  {
+    salt[i] = random(1, 256);
+  }
+  salt[8] = '\0';
+  return salt;
+}
+char* GNTP::season_string(char* arg, unsigned char* salt)
+{
+	char *challenge = (char*) malloc(sizeof(byte)*(strlen(arg)+9));
+	for(int i =0; i< strlen(arg); i++)
+	{
+		challenge[i] = arg[i];
+	}
+
+	for(int i = 0; i < 8 ; i++)
+	{
+		challenge[i+strlen(arg)] = salt[i];
+	}
+        challenge[strlen(arg)+8] = '\0';
+        return challenge;
+}
+
+void GNTP::setDebugging(bool dbg)
+{
+	debugging_enabled = dbg;
 }

@@ -4,9 +4,9 @@
 #include "Arduino.h"
 #include "Ethernet.h"
 #include "Ethernet.h"
-#define do{ NEWLINE Serial.println("");}while(false)
+#define NEWLINE do{ Serial.println("");}while(false)
 
-
+#define DBG(X) do{ if(debugging_enabled) { X ;}}while(false)
 class GNTPNotification
 {
 public:
@@ -36,12 +36,19 @@ public:
 	void sendNotification(GNTPNotification notification);
 	int count(void);
 	void begin(void);
+	void begin(char* pass);
+	void setDebugging(bool dbg);
 	EthernetClient client;
 	IPAddress server;
 	char* appName;
 	notificationsList* myNotifications;
 private:
+	bool debugging_enabled;
 	int port;
+	unsigned char* salt;
+	unsigned char* digest;
+	unsigned char* generate_salt(void);
+	char* season_string(char* arg, unsigned char* salt);
 };
 
 #endif
