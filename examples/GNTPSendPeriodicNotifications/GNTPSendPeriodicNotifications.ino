@@ -1,3 +1,4 @@
+#include <MD5.h>
 #include <GNTP.h>
 #include <SPI.h>
 #include <Ethernet.h>
