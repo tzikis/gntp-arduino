@@ -17,6 +17,7 @@ void setup()
 {
   // start the serial library:
   Serial.begin(9600);
+  gntp.begin();
   // start the Ethernet connection:
   Ethernet.begin(mac, ip);
   // give the Ethernet shield a second to initialize:
