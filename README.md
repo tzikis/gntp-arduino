@@ -1,0 +1,1 @@
+Arduino library for sending GNTP notifications. ~~Coming soon™~~ a prototype version was made which worked just fine! but if you are using Growl on Yosemite you may exoerience issues. At the time of this writing, it wasn't sure it Growl ran well in it
